@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -48,13 +49,13 @@ func evalPoints(input string) int {
 }
 
 func writeFile(buf []byte) error {
-	tmpPath := "./tmp"
+	tmpPath := "./"
 	err := os.MkdirAll(tmpPath, 0700)
 	if err != nil {
 		return err
 	}
 
-	file := filepath.Join(tmpPath, "radar-chart.png")
+	file := filepath.Join(tmpPath, "grafico.png")
 	err = ioutil.WriteFile(file, buf, 0600)
 	if err != nil {
 		return err
@@ -70,6 +71,7 @@ func main() {
 	Legend := []string{"Situación Actual", "Margen de mejora"}
 	RadarIndicator := make([]string, len(conf.Data))
 	RadarFixed := make([]float64, len(conf.Data))
+	RadarImprovement := make([]float64, len(conf.Data))
 	Values := make([]float64, len(conf.Data))
 
 	f, err := excelize.OpenFile("origin-data/input.xlsx")
@@ -87,6 +89,7 @@ func main() {
 	for i, val := range conf.Data {
 		RadarIndicator[i] = val.Name
 		RadarFixed[i] = float64(val.Total * 1000)
+		RadarImprovement[i] = float64(val.Total*1000 - (rand.Intn(10-0)+0)*20000/100)
 		sumList := 0
 		for _, cell := range val.List {
 			cellValue, err := f.GetCellValue(f.GetSheetName(0), cell)
@@ -94,23 +97,19 @@ func main() {
 				fmt.Println(err)
 				return
 			}
-			fmt.Println("valueeeeeee: ", cellValue)
-			fmt.Println("evalvalue: ", evalPoints(cellValue))
 			sumList += evalPoints(cellValue)
-			fmt.Println("sumList: ", sumList)
-
 		}
 		Values[i] = float64(sumList * 1000)
-		fmt.Println("xxxxxxx-> ", Values[i])
 	}
 
 	fmt.Println(Legend)
 	fmt.Println(RadarIndicator)
 	fmt.Println(RadarFixed)
+	fmt.Println(RadarImprovement)
 	fmt.Println(Values)
 	values := [][]float64{
 		Values,
-		RadarFixed,
+		RadarImprovement,
 	}
 	p, err := charts.RadarRender(
 		values,
@@ -129,25 +128,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	/*Get value from cell by given worksheet name and cell reference.
-	cell, err := f.GetCellValue(f.GetSheetName(0), "B2")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(cell)
-	// Get all the rows in the Sheet1.
-	rows, err := f.GetRows("Respuestas de formulario 1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	for _, row := range rows {
-		for _, colCell := range row {
-			fmt.Print(colCell, "\t")
-		}
-		fmt.Println()
-	}*/
 
 }
