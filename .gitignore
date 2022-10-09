@@ -4,3 +4,5 @@ config/*
 .idea
 origin-data/
 origin-data/*
+uploads
+uploads/*
