@@ -53,7 +53,7 @@ func (pr *Progress) Print() {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
-	http.ServeFile(w, r, "src/index.html")
+	http.ServeFile(w, r, "./src/index.html")
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
